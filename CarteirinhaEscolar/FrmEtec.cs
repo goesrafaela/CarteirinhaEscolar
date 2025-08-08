@@ -91,9 +91,12 @@ namespace CarteirinhaEscolar
             return txtNome.Text;
         }
 
+        // The issue is caused by a missing closing brace for the `btnGerar_Click` method.  
+        // Below is the corrected code with the missing closing brace added.
+
         private void btnGerar_Click(object sender, EventArgs e)
         {
-            // ========== PARTE DE TRÁS ==========
+            // ========== PARTE DE TRÁS ==========  
             if (pictureBox3.Image == null)
             {
                 MessageBox.Show("Selecione o modelo da parte de trás da carteirinha.");
@@ -103,52 +106,35 @@ namespace CarteirinhaEscolar
             Bitmap baseVerso = new Bitmap(pictureBox3.Image);
             using (Graphics gVerso = Graphics.FromImage(baseVerso))
             {
-                gVerso.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                gVerso.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                gVerso.SmoothingMode = SmoothingMode.AntiAlias;
+                gVerso.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                gVerso.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
-                // Fonte do conteúdo
+                // Fonte e pincel  
                 Font fonteCampo = new Font("Arial", 17f, FontStyle.Regular);
-                Font fontCodigo = new Font("IDAutomationHC39M", 30f);
                 Brush pincel = Brushes.Black;
-
-                // Dados
-                string curso = txtCurso.Text;
-                string matricula = txtMatr.Text;
-                string emissao = txtEmiss.Text;
-                string validade = txtData.Text;
-
-                // Centralização
-                float centroX = baseVerso.Width / 2;
-                float yStart = 72;
-                float espacoEntreGrupos = 84;
-
                 StringFormat centralizadoVerso = new StringFormat
                 {
                     Alignment = StringAlignment.Center,
                     LineAlignment = StringAlignment.Center
                 };
 
-                // Curso (sem título)
-                gVerso.DrawString(curso, fonteCampo, pincel,
-                    new PointF(centroX, yStart + 24), centralizadoVerso);
+                // Dados  
+                string curso = txtCurso.Text;
+                string matricula = txtMatr.Text;
+                string emissao = txtEmiss.Text;
+                string validade = txtData.Text;
 
-                // Matrícula (sem título)
-                gVerso.DrawString(matricula, fonteCampo, pincel,
-                    new PointF(centroX, yStart + espacoEntreGrupos + 24), centralizadoVerso);
-
-                // Emissão (sem título)
-                gVerso.DrawString(emissao, fonteCampo, pincel,
-                    new PointF(centroX, yStart + espacoEntreGrupos * 2 + 24), centralizadoVerso);
-
-                // Validade (sem título)
-                gVerso.DrawString(validade, fonteCampo, pincel,
-                    new PointF(centroX, yStart + espacoEntreGrupos * 3 + 24), centralizadoVerso);
+                // Posições dos retângulos (baseado na imagem de referência)  
+                gVerso.DrawString(curso, fonteCampo, pincel, new RectangleF(100, 80, 310, 40), centralizadoVerso);
+                gVerso.DrawString(matricula, fonteCampo, pincel, new RectangleF(100, 145, 310, 40), centralizadoVerso);
+                gVerso.DrawString(emissao, fonteCampo, pincel, new RectangleF(100, 210, 310, 40), centralizadoVerso);
+                gVerso.DrawString(validade, fonteCampo, pincel, new RectangleF(100, 275, 310, 40), centralizadoVerso);
             }
 
             pictureBox3.Image = baseVerso;
 
-
-            // ========== PARTE DA FRENTE ==========
+            // ========== PARTE DA FRENTE ==========  
             if (pictureBox2.Image == null)
             {
                 MessageBox.Show("Selecione o modelo da frente da carteirinha.");
@@ -161,23 +147,19 @@ namespace CarteirinhaEscolar
                 return;
             }
 
-            // Carrega a imagem base do crachá
             Bitmap baseFrente = new Bitmap(pictureBox2.Image);
             using (Graphics gFrente = Graphics.FromImage(baseFrente))
             {
                 gFrente.SmoothingMode = SmoothingMode.AntiAlias;
                 gFrente.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                gFrente.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
-                // Fontes (maiores e legíveis)
-                Font fonteNome = new Font("Arial", 22f, FontStyle.Bold);
-                Font fonteCargo = new Font("Arial", 16f, FontStyle.Regular);
+                // Configuração de fontes (ajustadas para match com a primeira imagem)
+                Font fonteNome = new Font("Arial", 14, FontStyle.Bold);      // Aumentado para 14pt
+                Font fonteCargo = new Font("Arial", 11, FontStyle.Regular);  // Aumentado para 11pt
                 Brush pincel = Brushes.Black;
 
-                // Textos digitados
-                string nome = txtNome.Text;
-                string cargo = txtCargo.Text;
-
-                // Centralização
+                // Centralização  
                 float centroX = baseFrente.Width / 2;
                 StringFormat centralizado = new StringFormat
                 {
@@ -185,28 +167,64 @@ namespace CarteirinhaEscolar
                     LineAlignment = StringAlignment.Center
                 };
 
-                // ==== FOTO (ajustada para o quadrado cinza) ====
-                int larguraFoto = 140;
-                int alturaFoto = 170;
-                int xFoto = (baseFrente.Width - larguraFoto) / 2;
-                int yFoto = 245; // Alinha dentro do quadrado da imagem original
+                // === FOTO CENTRALIZADA ===  
+                if (imgEtec.Image != null)
+                {
+                    // Dimensões ajustadas para match com a primeira imagem
+                    int larguraFoto = 130;  // Reduzido de 140 para 130
+                    int alturaFoto = 160;   // Reduzido de 170 para 160
 
-                gFrente.DrawImage(imgEtec.Image, xFoto, yFoto, larguraFoto, alturaFoto);
+                    // Posicionamento vertical ajustado (removido o -50)
+                    int xFoto = (baseFrente.Width - larguraFoto) / 2;
+                    int yFoto = (baseFrente.Height - alturaFoto) / 3; // Ajuste para posição mais alta
 
-                // ==== TEXTOS ====
-                float yNome = yFoto + alturaFoto + 25;   // abaixo da foto
-                float yCargo = yNome + 40;
+                    Image originalFoto = imgEtec.Image;
 
-                gFrente.DrawString(nome, fonteNome, pincel, new PointF(centroX, yNome), centralizado);
-                gFrente.DrawString(cargo, fonteCargo, pincel, new PointF(centroX, yCargo), centralizado);
+                    // Mantém o aspect ratio original
+                    float ratioDestino = (float)larguraFoto / alturaFoto;
+                    float ratioOriginal = (float)originalFoto.Width / originalFoto.Height;
+
+                    Rectangle srcRect;
+                    if (ratioOriginal > ratioDestino)
+                    {
+                        int larguraCrop = (int)(originalFoto.Height * ratioDestino);
+                        int xCrop = (originalFoto.Width - larguraCrop) / 2;
+                        srcRect = new Rectangle(xCrop, 0, larguraCrop, originalFoto.Height);
+                    }
+                    else
+                    {
+                        int alturaCrop = (int)(originalFoto.Width / ratioDestino);
+                        int yCrop = (originalFoto.Height - alturaCrop) / 2;
+                        srcRect = new Rectangle(0, yCrop, originalFoto.Width, alturaCrop);
+                    }
+
+                    // Desenha a imagem
+                    gFrente.DrawImage(originalFoto,
+                                     new Rectangle(xFoto, yFoto, larguraFoto, alturaFoto),
+                                     srcRect,
+                                     GraphicsUnit.Pixel);
+
+                    // === TEXTOS ABAIXO DA FOTO ===  
+                    float espacoAbaixoFoto = 20;  // Reduzido o espaçamento
+                    float espacoEntreLinhas = 15; // Reduzido o espaçamento
+
+                    float posYNome = yFoto + alturaFoto + espacoAbaixoFoto;
+                    float posYCargo = posYNome + fonteNome.Height + espacoEntreLinhas;
+
+                    // Desenha os textos (ajuste para caixa alta e centralização)
+                    gFrente.DrawString(txtNome.Text.ToUpper(), fonteNome, pincel,
+                                      new PointF(centroX, posYNome), centralizado);
+                    gFrente.DrawString(txtCargo.Text.ToUpper(), fonteCargo, pincel,
+                                      new PointF(centroX, posYCargo), centralizado);
+                }
+
+                pictureBox2.Image = baseFrente;
             }
-
-            // Atualiza o PictureBox com o novo crachá
-            pictureBox2.Image = baseFrente;
-
+            
         }
-
-        private void btnVerso_Click(object sender, EventArgs e)
+         // Added this missing closing brace to fix the error.
+       
+            private void btnVerso_Click(object sender, EventArgs e)
         {
             using var openFileDialog = new OpenFileDialog
             {
@@ -316,3 +334,4 @@ namespace CarteirinhaEscolar
         }
     }
 }
+

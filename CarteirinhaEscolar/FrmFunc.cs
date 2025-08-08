@@ -142,7 +142,7 @@ namespace CarteirinhaEscolar
                 gFrente.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
                 // Configurações de fonte
-                Font fonteNome = new Font("Arial", 22f, FontStyle.Bold);
+                Font fonteNome = new Font("Arial", 16f, FontStyle.Bold);
                 Font fonteCargo = new Font("Arial", 16f, FontStyle.Regular);
                 Brush pincel = Brushes.Black;
 
@@ -160,21 +160,45 @@ namespace CarteirinhaEscolar
                 // === FOTO CENTRALIZADA NO QUADRADO CINZA ===
                 if (pictureBox1.Image != null)
                 {
-                    // Dimensões ajustadas para o template
-                    int larguraFoto = 140;
-                    int alturaFoto = 170;
-                    int xFoto = (baseFrente.Width - larguraFoto) / 2;
-                    int yFoto = 220; // Posição Y ajustada para o template
+                    // Área real do quadrado cinza (conforme informado: 121 x 155)
+                    int areaX = 125;
+                    int areaY = 209;
+                    int areaLargura = 121;
+                    int areaAltura = 170;
 
-                    gFrente.DrawImage(pictureBox1.Image, xFoto, yFoto, larguraFoto, alturaFoto);
+                    Image imagemOriginal = pictureBox1.Image;
+
+                    // Mantém a proporção 3x4 (largura:altura)
+                    float proporcao = 3f / 4f;
+                    int novaLargura, novaAltura;
+
+                    if ((float)areaLargura / areaAltura > proporcao)
+                    {
+                        // Área mais larga que necessário → ajusta pela altura
+                        novaAltura = areaAltura;
+                        novaLargura = (int)(novaAltura * proporcao);
+                    }
+                    else
+                    {
+                        // Área mais estreita → ajusta pela largura
+                        novaLargura = areaLargura;
+                        novaAltura = (int)(novaLargura / proporcao);
+                    }
+
+                    // Centraliza dentro da área
+                    int xFoto = areaX + (areaLargura - novaLargura) / 2;
+                    yFoto = areaY + (areaAltura - novaAltura) / 2;
+
+                    gFrente.DrawImage(imagemOriginal, xFoto, yFoto, novaLargura, novaAltura);
+
+                    // === TEXTOS ABAIXO DA FOTO CENTRALIZADOS ===
+                    float posYNome = yFoto + novaAltura + 25;
+                    float posYCargo = posYNome + 30;
+
+                    gFrente.DrawString(nome, fonteNome, pincel, new PointF(centroX, posYNome), centralizado);
+                    gFrente.DrawString(cargo, fonteCargo, pincel, new PointF(centroX, posYCargo), centralizado);
                 }
 
-                // === TEXTOS ABAIXO DA FOTO CENTRALIZADOS ===
-                float posYNome = 420; // Posição fixa para o nome no template
-                float posYCargo = 460; // Posição fixa para o cargo no template
-
-                gFrente.DrawString(nome, fonteNome, pincel, new PointF(centroX, posYNome), centralizado);
-                gFrente.DrawString(cargo, fonteCargo, pincel, new PointF(centroX, posYCargo), centralizado);
             }
 
             pictureBox2.Image = baseFrente;
@@ -192,8 +216,7 @@ namespace CarteirinhaEscolar
                 gVerso.SmoothingMode = SmoothingMode.AntiAlias;
                 gVerso.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                // Configurações de fonte
-                Font fonteCampo = new Font("Arial", 14f, FontStyle.Regular); // Usando a mesma fonte para centralizar melhor
+                Font fonteCampo = new Font("Arial", 14f, FontStyle.Regular);
                 Brush pincel = Brushes.Black;
 
                 string nomeCompleto = txtNomeCom.Text;
@@ -208,14 +231,12 @@ namespace CarteirinhaEscolar
                     LineAlignment = StringAlignment.Center
                 };
 
-                // *** AJUSTE MANUAL PARA SUBIR O TEXTO ***
-                float ajusteSubir = 25f; // Experimente valores como 5, 8, 10...
+                float ajusteSubir = 28f;
 
                 float yRetanguloNomeCentro = 165f - ajusteSubir;
                 float yRetanguloMatriculaCentro = 225f - ajusteSubir;
                 float yRetanguloDataCentro = 285f - ajusteSubir;
 
-                // Desenha os campos centralizados nos retângulos
                 gVerso.DrawString(nomeCompleto, fonteCampo, pincel, new PointF(centroX, yRetanguloNomeCentro), centralizadoRetangulo);
                 gVerso.DrawString(matricula, fonteCampo, pincel, new PointF(centroX, yRetanguloMatriculaCentro), centralizadoRetangulo);
                 gVerso.DrawString(dataContratacao, fonteCampo, pincel, new PointF(centroX, yRetanguloDataCentro), centralizadoRetangulo);
